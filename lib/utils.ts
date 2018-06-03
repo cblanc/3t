@@ -38,3 +38,21 @@ export const diagonals = <T>(arr: T[]): [T[], T[]] => {
 	
 	return [leadingDiagonal, trailingDiagonal];
 };
+
+/**
+ * Returns random int less than `n` and greater than 0
+ * @type {[type]}
+ */
+const randomInt = (n: number): number => {
+	return Math.floor(Math.random() * n);
+};
+
+/**
+ * Picks random element in array
+ * @type {[type]}
+ */
+export const randomElem = <T>(arr: T[]): T => {
+	return arr[randomInt(arr.length)];
+};
+
+

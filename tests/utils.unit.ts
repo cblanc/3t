@@ -1,5 +1,5 @@
 import { assert } from "chai";
-import { tail, chunkify, transpose, diagonals } from "../lib/utils";
+import { tail, randomElem, chunkify, transpose, diagonals } from "../lib/utils";
 
 describe("Utils", () => {
 	describe("tail", () => {
@@ -41,6 +41,21 @@ describe("Utils", () => {
 				6,7,8,
 			];
 			assert.deepEqual(diagonals(matrix), [[0,4,8], [6,4,2]]);
+		});
+	});
+
+	describe("randomElem", () => {
+		it ("returns random element in array", () => {
+			const target = [0,1,2];
+			let result: number[] = [];
+			let newElem;
+			while (result.length !== 3) {
+				newElem = randomElem(target);
+				if (result.indexOf(newElem) === -1) {
+					result.push(newElem);
+				}
+			}
+			assert.deepEqual(target, result.sort());
 		});
 	});
 });
