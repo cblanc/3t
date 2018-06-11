@@ -1,27 +1,43 @@
 import { chunkify, diagonals, randomElem, transpose } from "./utils";
 
-const isX = (m: move): boolean => m === 1;
-const isO = (m: move): boolean => m === 0;
-const isNoMove = (m: move): boolean => m === null;
+const isX = (m: Move): boolean => m === 1;
+const isO = (m: Move): boolean => m === 0;
+const isNoMove = (m: Move): boolean => m === null;
 
-// Returns true if X occupies every cell
-const xWins = (moves: move[]): boolean => moves.every(isX);
+export type Position = number;
 
-// Returns true if O occupies every cell
-const oWins = (moves: move[]): boolean => moves.every(isO);
+// A number which uniquely identifies and board and moves played
+export type GameId = number;
 
-export type move = 1 		 // Cross
+/**
+ * Translates move to string
+ * @type {string}
+ */
+const toString = (m: Move): string => {
+	if (m === 1) return "X";
+	if (m === 0) return "O";
+
+	return " ";
+};
+
+// Returns true if X occupies every POSITION
+const xWins = (moves: Move[]): boolean => moves.every(isX);
+
+// Returns true if O occupies every POSITION
+const oWins = (moves: Move[]): boolean => moves.every(isO);
+
+export type Move = 1 		 // Cross
 			 			 	 	 | 0		 // Circle
 								 | null; // No move
 
-const EMPTY_CELL = 2;
+const EMPTY_POSITION: Position = 2;
 
-export const newGame = (n: number): move[] => new Array(n).fill(null);
+export const newGame = (n: number): Move[] => new Array(n).fill(null);
 
 export class GameState {
-	public moves: move[];
+	public moves: Move[];
 
-	constructor(moves: move[]) {
+	constructor(moves: Move[]) {
 		this.moves = moves.slice(0);
 	}
 
@@ -31,32 +47,32 @@ export class GameState {
 
 	/**
 	 * Returns row of moves from top to bottom
-	 * @return {move[]}
+	 * @return {Move[]}
 	 */
-	get rows(): move[][] {
+	get rows(): Move[][] {
 		return chunkify(this.moves, this.gridLength);
 	}
 
 	/**
 	 * Return columns of moves from left to right
-	 * @return {move[]}
+	 * @return {Move[]}
 	 */
-	get columns(): move[][] {
+	get columns(): Move[][] {
 		return chunkify(transpose(this.moves), this.gridLength); 
 	}
 
 	/**
 	 * Returns leading and trailing diagonals as tuple (in that order)
 	 */
-	get diagonals(): [move[], move[]] {
+	get diagonals(): [Move[], Move[]] {
 		return diagonals(this.moves);
 	}
 
 	/**
 	 * It returns winner or null if no winner
-	 * @return {move}
+	 * @return {Move}
 	 */
-	get winner(): move {
+	get winner(): Move {
 		const cases = [...this.rows, ...this.columns, ...this.diagonals];
 		if (cases.some(xWins)) return 1;
 		if (cases.some(oWins)) return 0;
@@ -76,6 +92,14 @@ export class GameState {
 	}
 
 	/**
+	 * Returns true if game is complete
+	 * @return {boolean}
+	 */
+	get complete(): boolean {
+		return this.drawn || this.winner !== null;
+	}
+
+	/**
 	 * Returns a unique number to represent moves
 	 * Note that once grid size is sufficiently large,
 	 * the set of integers available to javascript (2^53) will no 
@@ -83,25 +107,24 @@ export class GameState {
 	 * 
 	 * @return {number}
 	 */
-	get id(): number {
+	get id(): GameId {
+		const id = this.moves
+			.map(elem => {
+				if (elem === null) return EMPTY_POSITION;
 
-		return parseInt(
-			this.moves
-				.map(elem => {
-					if (elem === null) return EMPTY_CELL;
-					
-					return elem;
-				})
-				.join("")
-		, 3);
+				return elem;
+			})
+			.join("");
+
+		return parseInt(id, 3);
 	}
 
 	/**
 	 * Returns who moves next (X is first)
 	 * Upon completed game, just returns the first mover
-	 * @return {move} 
+	 * @return {Move} 
 	 */
-	get nextMover(): move {
+	get nextMover(): Move {
 		const noMoves = this.moves.filter(isNoMove);
 		const x = this.moves.filter(isX);
 		const o = this.moves.filter(isO);
@@ -113,13 +136,13 @@ export class GameState {
 	/**
 	 * Applies a move to gamestate given mover and position
 	 * Returns a new gamestate instance
-	 * @param  {move}      m        
-	 * @param  {number}    position 
+	 * @param  {Move}      m        
+	 * @param  {Position}    position 
 	 * @return {GameState}          
 	 */
-	public applyMove(m: move, position: number): GameState {
+	public applyMove(m: Move, pos: Position): GameState {
 		const newMoves = this.moves.slice(0);
-		newMoves[position] = m;
+		newMoves[pos] = m;
 
 		return new GameState(newMoves);
 	}
@@ -130,14 +153,75 @@ export class GameState {
 	 * @return {GameState} 
 	 */
 	public applyRandomMove(): GameState|null {
-		if (this.winner !== null) return null;
-		const availableMoves: number[] = [];
-		this.moves.forEach((elem, i) => {
-			if (elem === null) availableMoves.push(i);
-		});
-		if (availableMoves.length === 0) return null;
-		const nextMove = randomElem(availableMoves);
+		const { nextMover, availablePositions } = this;
 
-		return this.applyMove(this.nextMover, nextMove);
+		return this.applyMove(nextMover, randomElem(availablePositions));
+	}
+
+	/**
+	 * Prints divider used in table printing
+	 */
+	get dividerString(): string {
+		let rowDivider = "+";
+		for (let i = 0; i < this.gridLength; i++) {
+			rowDivider += "-+"
+		}
+
+		return `\n${rowDivider}\n`;
+	}
+
+	/**
+	 * Returns a list of possible next states
+	 * @return {GameState[]} [description]
+	 */
+	get possibleNextStates(): GameState[] {
+		return this.availablePositions.map(pos => {
+			return this.applyMove(this.nextMover, pos);
+		});
+	}
+
+	/**
+	 * Returns list of empty positions
+	 * Returns empty positions list if
+	 * - game is won or drawn
+	 * - no further positions availble
+	 * @return {number[]}
+	 */
+	get availablePositions(): Position[] {
+		const availablePositions: Position[] = [];
+		if (this.winner !== null) return availablePositions;
+		this.moves.forEach((elem, i) => {
+			if (elem === null) availablePositions.push(i);
+		});
+
+		return availablePositions;
+	}
+
+	/**
+	 * Prints current state to console
+	 */
+	public print(): void {
+		const table = this.rows.map(row => {
+			const r = row.map(move => {
+				if (move === null) return "";
+
+				return toString(move);
+			})
+			.join("|");
+			
+			return `|${r}|`;
+		}).join(this.dividerString);
+		console.log(table);
+	}
+
+	/**
+	 * Creates an empty gamestate
+	 * @param  {number}    size
+	 * @return {GameState}     
+	 */
+	static empty(size: number): GameState {
+		const moves = new Array(size).fill(null);
+
+		return new GameState(moves);
 	}
 }

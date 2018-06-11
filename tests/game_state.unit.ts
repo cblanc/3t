@@ -1,6 +1,6 @@
 import { assert } from "chai";
 import { tail } from "../lib/utils";
-import { GameState, newGame, move } from "../lib/game_state";
+import { GameState, newGame, Move } from "../lib/game_state";
 
 describe("newGame", () => {
 	it ("instantiates a list of no moves", () => {
@@ -12,7 +12,7 @@ describe("newGame", () => {
 
 describe("GameState", () => {
 	let gameState: GameState;
-	let moves: move[];
+	let moves: Move[];
 
 	beforeEach(() => {
 		moves = newGame(9);
@@ -27,6 +27,15 @@ describe("GameState", () => {
 		
 		it ("assigns grid length as sqrt of size", () => {
 			assert.equal(gameState.gridLength, 3);
+		});
+	});
+
+	describe(".empty", () => {
+		it ("creates an empty game with size n", () => {
+			const n = 9;			
+			const gameState = GameState.empty(n);
+			assert.equal(gameState.moves.length, n);
+			assert.isTrue(gameState.moves.every(e => e === null));
 		});
 	});
 
@@ -150,23 +159,47 @@ describe("GameState", () => {
 			assert.isFalse(lastGame.moves.every(move => move === null));
 			assert.equal(lastGame.moves.filter(move => move === 1).length, 1);
 		});
+	});
 
-		it ("returns null if game is drawn", () => {
+	describe("print", () => {
+		it ("prints table", () => {
 			gameState.moves = [
-				1,1,0,
+				1,1,1,
 				0,0,1,
 				1,1,0,
 			];
-			assert.isNull(gameState.applyRandomMove());
+			gameState.print();
 		});
+	});
 
+	describe("availablePositions", () => {
+		it ("returns an array of available positions", () => {
+			assert.deepEqual(gameState.availablePositions.sort(), 
+				[0,1,2,3,4,5,6,7,8]);
+		});
+		it ("returns empty array if none available", () => {
+			gameState.moves = [
+				1,1,1,
+				0,0,1,
+				1,1,0,
+			];
+			assert.deepEqual(gameState.availablePositions, []);
+		});
 		it ("returns null if winner", () => {
 			gameState.moves = [
 				1,1,1,
 				0,0,1,
 				1,1,0,
 			];
-			assert.isNull(gameState.applyRandomMove());
+			assert.deepEqual(gameState.availablePositions, []);
+		});
+		it ("returns null if winner and incomplete", () => {
+			gameState.moves = [
+				1,1,1,
+				0,0,1,
+				1,null,null,
+			];
+			assert.deepEqual(gameState.availablePositions, []);
 		});
 	});
 });
