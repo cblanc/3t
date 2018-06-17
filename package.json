@@ -10,6 +10,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "simulate": "./node_modules/.bin/ts-node bin/simulate.ts",
+    "predict": "./node_modules/.bin/ts-node bin/predict.ts",
     "test": "npm run lint && NODE_ENV=test node_modules/.bin/nyc node_modules/.bin/mocha --opts mocha.opts",
     "lint": "node_modules/.bin/tslint -c tslint.json -p tsconfig.json lib/**/*.ts",
     "build": "npm run lint && node_modules/.bin/tsc",
