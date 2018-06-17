@@ -1,12 +1,12 @@
-# enceladus
+# 3t
 
-- [x] TS build process `npm run build`
-- [x] Linter `npm run lint`
-- [x] Testing & coverage `npm run test`
+TicTacToe that learns
 
-## Reminders
+## Todo
 
-- [ ] Update `repository` and `name` in `package.json`
-- [ ] Enable greenkeeper
-- [ ] CircleCI
-- [ ] Update `README.md`
+- [x] Learning Strategy: Random
+- [ ] Learning Strategy: Random + 1 Move ahead
+- [ ] Learning Strategy: Monte Carlo Tree Search
+- [x] `npm run simulate`
+- [ ] `npm run predict`
+- [ ] `npm run play`
