@@ -188,7 +188,8 @@ describe("GameState", () => {
 				0,0,1,
 				1,1,0,
 			];
-			gameState.print();
+			const expected = '|X|X|X|\n+-+-+-+\n|O|O|X|\n+-+-+-+\n|X|X|O|';
+			assert.equal(gameState.print(), expected);
 		});
 	});
 

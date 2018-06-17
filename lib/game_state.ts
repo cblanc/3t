@@ -32,7 +32,7 @@ export type Move = 1 		 // Cross
 			 			 	 	 | 0		 // Circle
 								 | null; // No move
 
-const EMPTY_POSITION: Position = 2;
+export const EMPTY_POSITION: Position = 2;
 
 export const newGame = (n: number): Move[] => new Array(n).fill(null);
 
@@ -192,12 +192,12 @@ export class GameState {
 	}
 
 	/**
-	 * Prints current state to console
+	 * Returns state of game which can be printed to console
 	 */
-	public print(): void {
-		const table = this.rows.map(row => {
+	public print(): string {
+		return this.rows.map(row => {
 			const r = row.map(move => {
-				if (move === null) return "";
+				if (move === null) return " ";
 
 				return toString(move);
 			})
@@ -205,7 +205,6 @@ export class GameState {
 			
 			return `|${r}|`;
 		}).join(this.dividerString);
-		console.log(table);
 	}
 
 	/**
