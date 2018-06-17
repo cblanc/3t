@@ -3,13 +3,13 @@ import { GameState } from "./game_state";
 import { tail } from "./utils";
 
 export interface SimulationOptions {
-	size: number;
+	size: number; // Board size
 	simulations: number;
 	filePath?: string;
 }
 
 export class Simulation {
-	private brain: Brain;
+	public brain: Brain;
 	private size: number;
 	private simulations: number;
 
@@ -21,15 +21,17 @@ export class Simulation {
 		if (filePath) this.brain.load(filePath);
 	}
 
-	/**
-	 * Runs simulation
-	 */
+	// Runs simulation
 	run(): void {
 		for (let i = 0; i < this.simulations; i += 1) {
 			this.dispatchSimulation();
 		}
 	}
 
+	/**
+	 * Run a game from start to finish. Update brain with moves and final game
+	 * endstate
+	 */
 	dispatchSimulation(): void {
 		let current: GameState = GameState.empty(this.size);
 		const gameStates = [current];
@@ -41,11 +43,14 @@ export class Simulation {
 		}
 		this.brain.learn(gameStates);
 	}
+	
+	// Loads brain
+	save(file: string): Promise<void> {
+		return this.brain.save(file);
+	}
 
-	/**
-	 * Saves brain
-	 */
-	cleanUp(): void {
-
+	// Loads brain
+	load(file: string): void {
+		this.brain.load(file);
 	}
 }

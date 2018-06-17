@@ -3,13 +3,16 @@
  * Match contains multiple rounds
  */
 
-import { writeFileSync } from "fs";
+import { writeFile } from "fs";
+import { promisify } from "util";
 import { 
 	GameId,
 	GameState,
 	Move,
 } from "./game_state";
 import { tail } from "./utils";
+
+const write = promisify(writeFile);
 
 interface BrainJSON {
 	memory: GameStateConfig[];
@@ -125,16 +128,25 @@ export class Brain {
 	}
 
 	load(file: string): void {
-		const data = <BrainJSON>require(file);
+		console.log(file)
+		const data = require(file) as BrainJSON;
 		data.memory.forEach(memory => {
 			this.memory.set(memory.gameId, new GameStateMemory(memory));
 		});
 	}
 
-	save(): void {
-		writeFileSync(
-			"../brain.json",
-			JSON.stringify({ memory: Array.from(this.memory.values()).map(m => m.json) }),
+	toJson(): string {
+		const memory = Array
+			.from(this.memory.values())
+			.map(m => m.json);
+
+		return JSON.stringify({ memory });
+	}
+
+	save(filePath: string): Promise<void> {
+		return write(
+			filePath,
+			this.toJson(),
 			{ encoding: "utf8" }
 		);
 	}
