@@ -4,6 +4,8 @@ const isX = (m: Move): boolean => m === 1;
 const isO = (m: Move): boolean => m === 0;
 const isNoMove = (m: Move): boolean => m === null;
 
+const NO_POSSIBLE_MOVES = 3;
+
 export type Position = number;
 
 // A number which uniquely identifies and board and moves played
@@ -108,15 +110,7 @@ export class GameState {
 	 * @return {number}
 	 */
 	get id(): GameId {
-		const id = this.moves
-			.map(elem => {
-				if (elem === null) return EMPTY_POSITION;
-
-				return elem;
-			})
-			.join("");
-
-		return parseInt(id, 3);
+		return GameState.toId(this.moves);
 	}
 
 	/**
@@ -223,5 +217,36 @@ export class GameState {
 		const moves = new Array(size).fill(null);
 
 		return new GameState(moves);
+	}
+
+	static toId(moves: Move[]): GameId {
+		const id = moves
+			.map(elem => {
+				if (elem === null) return EMPTY_POSITION;
+
+				return elem;
+			})
+			.join("");
+
+		return parseInt(id, NO_POSSIBLE_MOVES);
+	}
+
+	/**
+	 * Creates gamestate from gameId
+	 * @param  {GameId}    id [description]
+	 * @return {GameState}    [description]
+	 */
+	static fromId(id: GameId): GameState {
+		const moves = id
+			.toString(NO_POSSIBLE_MOVES) // Convert back to base 3 representation
+			.split("")
+			.map(n => parseInt(n, 10))
+			.map(n => {
+				if (n === EMPTY_POSITION) return null;
+
+				return n;
+			});
+			
+		return new GameState(moves as Move[]);
 	}
 }

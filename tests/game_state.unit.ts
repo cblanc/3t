@@ -2,11 +2,31 @@ import { assert } from "chai";
 import { tail } from "../lib/utils";
 import { GameState, newGame, Move } from "../lib/game_state";
 
-describe("newGame", () => {
+describe(".newGame", () => {
 	it ("instantiates a list of no moves", () => {
 		const moves = newGame(9);
 		assert.equal(moves.length, 9);
 		moves.forEach(assert.isNull.bind(assert));
+	});
+});
+
+describe(".fromId", () => {
+	it ("generates gamestate from id", () => {
+		const moves = newGame(9);
+		moves[0] = 1;
+		moves[1] = 0;
+		const id = GameState.toId(moves);
+		const gameState = GameState.fromId(id);
+		assert.deepEqual(gameState.moves, moves);
+	});
+});
+
+describe("toId", () => {
+	it ("converts a set of moves to a unique id number", () => {
+		const moves = newGame(9);
+		moves[0] = 1;
+		moves[1] = 0;
+		assert.equal(parseInt("102222222", 3), GameState.toId(moves));
 	});
 });
 
