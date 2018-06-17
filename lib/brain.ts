@@ -112,19 +112,36 @@ export class Brain {
 		
 		gameStates.forEach(gameState => {
 			const { id } = gameState;
-			let activeMemory = this.memory.get(id);
+			const memory = this.recall(id);
+			if (winner === 1) return memory.boostX();
+			if (winner === 0) return memory.boostO();
 
-			// Instantiate new memory if never before state observed
-			if (activeMemory === undefined) {
-				activeMemory = GameStateMemory.newEmpty(id);
-				this.memory.set(id, activeMemory);
-			}
-
-			if (winner === 1) return activeMemory.boostX();
-			if (winner === 0) return activeMemory.boostO();
-
-			return activeMemory.boostDraw();
+			return memory.boostDraw();
 		});
+	}
+
+
+	/**
+	 * Retrives memory for particular game
+	 * If no memory exists, empty one is created and returned
+	 * @param  {GameId}          id
+	 * @return {GameStateMemory}   
+	 */
+	recall(id: GameId): GameStateMemory {
+		const memory = this.memory.get(id);
+		if (memory !== undefined) return memory;
+		// Instantiate new memory if never before state observed
+		const newMemory = GameStateMemory.newEmpty(id);
+		this.memory.set(id, newMemory);
+
+		return newMemory;
+	}
+
+	// Predicts outcomes given gamestate
+	predict(id: GameId): Predictions {
+		const memory = this.recall(id);
+		
+		return memory.predictions;
 	}
 
 	load(file: string): void {
